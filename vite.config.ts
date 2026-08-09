@@ -8,7 +8,7 @@ export default defineConfig({
     federation({
       name: 'remoteTeam',
       filename: 'remoteEntry.js',
-      exposes: { './TeamJoin': './src/TeamJoin.jsx' },
+      exposes: { './TeamJoin': './src/TeamJoin.tsx' },
       shared: ['react', 'react-dom']
     })
   ],

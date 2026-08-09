@@ -1,4 +1,4 @@
-import React from 'react';
+import type { CSSProperties } from 'react';
 
 // Resolved against import.meta.url (this remote's own origin) instead of a plain
 // import, so the URLs still work once this component is rendered inside host-shell's page.
@@ -12,9 +12,16 @@ const mbappeImg = new URL('./assets/team2/team2_Kylian_Mbappe.jpeg', import.meta
 const yamalImg = new URL('./assets/team2/team2_Lamine_Yamal.jpg', import.meta.url).href;
 
 // Switch which roster is shown: 'team1' or 'team2'
-const ACTIVE_TEAM = 'team2';
+const ACTIVE_TEAM: 'team1' | 'team2' = 'team2';
 
-const TEAMS = {
+interface TeamMember {
+  name: string;
+  role: string;
+  emoji: string;
+  photo: string;
+}
+
+const TEAMS: Record<'team1' | 'team2', TeamMember[]> = {
   team1: [
     { name: 'Athena', role: 'Business Analyst', emoji: '🦉', photo: athenaImg },
     { name: 'Odysseus', role: 'Senior Backend Voyager', emoji: '🚢', photo: odysseusImg },
@@ -52,7 +59,7 @@ export default function TeamJoin() {
   );
 }
 
-const listStyle = {
+const listStyle: CSSProperties = {
   listStyle: 'none',
   padding: 0,
   margin: '0 0 14px 0',
@@ -60,13 +67,13 @@ const listStyle = {
   color: '#c9d1d9',
 };
 
-const photoGridStyle = {
+const photoGridStyle: CSSProperties = {
   display: 'flex',
   gap: 0,
   height: '160px',
 };
 
-const photoStyle = {
+const photoStyle: CSSProperties = {
   height: '100%',
   width: 'auto',
   objectFit: 'cover',
