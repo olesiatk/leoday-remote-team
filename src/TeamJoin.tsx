@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 
 // Resolved against import.meta.url (this remote's own origin) instead of a plain
 // import, so the URLs still work once this component is rendered inside host-shell's page.
@@ -38,8 +38,42 @@ const TEAMS: Record<'team1' | 'team2', TeamMember[]> = {
 export default function TeamJoin() {
   const members = TEAMS[ACTIVE_TEAM];
 
+  const gridRef = useRef<HTMLDivElement>(null);
+  const imgRefs = useRef<Record<string, HTMLImageElement | null>>({});
+  const [rowHeight, setRowHeight] = useState<number | undefined>(undefined);
+
+  // Row height must equal the shortest photo once every image is scaled to
+  // the same column width, so taller photos get cropped vertically instead
+  // of the whole row stretching to the tallest one.
+  const recalcRowHeight = useCallback(() => {
+    const container = gridRef.current;
+    if (!container || members.length === 0) return;
+
+    const columnWidth = container.clientWidth / members.length;
+    const heights: number[] = [];
+
+    for (const m of members) {
+      const img = imgRefs.current[m.name];
+      if (!img?.naturalWidth || !img.naturalHeight) return;
+      heights.push(columnWidth * (img.naturalHeight / img.naturalWidth));
+    }
+
+    setRowHeight(Math.min(...heights));
+  }, [members]);
+
+  useEffect(() => {
+    recalcRowHeight();
+
+    const container = gridRef.current;
+    if (!container || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => recalcRowHeight());
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [recalcRowHeight]);
+
   return (
-    <div style={{ fontFamily: "'Source Sans Pro', sans-serif" }}>
+    <div style={{ fontFamily: "'Source Sans Pro', sans-serif"}}>
       <h3 style={{ color: '#57B12D', margin: '0 0 10px 0', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, textTransform: 'uppercase' }}>👥 Look Who Joined Our Team!</h3>
 
       <ul style={listStyle}>
@@ -50,9 +84,16 @@ export default function TeamJoin() {
         ))}
       </ul>
 
-      <div style={photoGridStyle}>
+      <div ref={gridRef} style={{ ...photoGridStyle, height: rowHeight ? `${rowHeight}px` : 'auto' }}>
         {members.map((m) => (
-          <img key={m.name} src={m.photo} alt={m.name} style={photoStyle} />
+          <img
+            key={m.name}
+            ref={(el) => { imgRefs.current[m.name] = el; }}
+            src={m.photo}
+            alt={m.name}
+            style={photoStyle}
+            onLoad={recalcRowHeight}
+          />
         ))}
       </div>
     </div>
@@ -69,12 +110,16 @@ const listStyle: CSSProperties = {
 
 const photoGridStyle: CSSProperties = {
   display: 'flex',
+  flexWrap: 'nowrap',
   gap: 0,
-  height: '160px',
+  overflow: 'hidden',
 };
 
 const photoStyle: CSSProperties = {
+  flex: '1 1 0',
+  minWidth: 0,
+  width: '100%',
   height: '100%',
-  width: 'auto',
   objectFit: 'cover',
+  display: 'block',
 };
