@@ -12,7 +12,7 @@ const mbappeImg = new URL('./assets/team2/team2_Kylian_Mbappe.jpeg', import.meta
 const yamalImg = new URL('./assets/team2/team2_Lamine_Yamal.jpg', import.meta.url).href;
 
 // Switch which roster is shown: 'team1' or 'team2'
-const ACTIVE_TEAM: 'team1' | 'team2' = 'team2';
+const ACTIVE_TEAM: 'team1' | 'team2' = 'team1';
 
 interface TeamMember {
   name: string;
